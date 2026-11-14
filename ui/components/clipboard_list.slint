@@ -1,0 +1,48 @@
+import { Theme } from "../styles/themes.slint";
+
+export component ClipboardList inherits Rectangle {
+    in property <[string]> clips;
+    callback picked(int);
+
+    if root.clips.length == 0 : Text {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: 40px;
+        text: "Copy something and it shows up here";
+        color: Theme.text-dim;
+        font-size: 13px;
+        vertical-alignment: center;
+    }
+
+    VerticalLayout {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        spacing: 4px;
+        alignment: start;
+
+        for clip[i] in root.clips : Rectangle {
+            height: 22px;
+            border-radius: 8px;
+            background: row.has-hover ? Theme.chip-active : Theme.chip;
+
+            Text {
+                x: 10px;
+                y: 0px;
+                width: parent.width - 20px;
+                height: parent.height;
+                text: clip;
+                color: Theme.text;
+                font-size: 12px;
+                overflow: elide;
+                vertical-alignment: center;
+            }
+
+            row := TouchArea {
+                mouse-cursor: pointer;
+                clicked => { root.picked(i); }
+            }
+        }
+    }
+}

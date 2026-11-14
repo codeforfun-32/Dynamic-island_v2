@@ -1,0 +1,35 @@
+import { Theme } from "../styles/themes.slint";
+import { Chip } from "controls.slint";
+
+export component VoiceWave inherits Rectangle {
+    in property <[float]> bars;
+    in property <bool> live;
+    callback toggled(bool);
+
+    // 9 bars: 9 * 14px + 8 * 8px gaps = 190px
+    Rectangle {
+        x: (parent.width - 190px) / 2;
+        y: 0px;
+        width: 190px;
+        height: 90px;
+
+        for b[i] in root.bars : Rectangle {
+            x: i * 22px;
+            y: (90px - self.height) / 2;
+            width: 14px;
+            height: Math.max(6px, b * 84px);
+            border-radius: 7px;
+            background: Theme.accent;
+            animate height { duration: 70ms; }
+        }
+    }
+
+    Chip {
+        x: (parent.width - 110px) / 2;
+        y: 100px;
+        width: 110px;
+        text: root.live ? "Stop mic" : "Start mic";
+        active: root.live;
+        clicked => { root.toggled(!root.live); }
+    }
+}

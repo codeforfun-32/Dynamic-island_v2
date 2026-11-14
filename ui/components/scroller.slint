@@ -1,0 +1,67 @@
+import { Theme } from "../styles/themes.slint";
+
+// A scrollable area with a thin scrollbar. Put your content inside and set
+// `content-height` to the total height of that content. The scrollbar only
+// appears when the content is taller than the area.
+// Scroll with the mouse wheel, or drag the scrollbar.
+export component Scroller inherits Rectangle {
+    in property <length> content-height: 0px;
+
+    clip: true;
+
+    property <length> max-scroll: Math.max(0px, root.content-height - root.height);
+    property <bool> scrollable: root.max-scroll > 1px;
+    property <length> thumb-h: Math.max(24px, root.height * (root.height / Math.max(root.content-height, 1px)));
+    property <length> thumb-y: root.max-scroll > 0px
+        ? (-fl.viewport-y / root.max-scroll) * (root.height - root.thumb-h)
+        : 0px;
+
+    function drag-by(dy: length) {
+        fl.viewport-y = -Math.clamp(
+            -fl.viewport-y + dy * (root.max-scroll / Math.max(root.height - root.thumb-h, 1px)),
+            0px,
+            root.max-scroll
+        );
+    }
+
+    fl := Flickable {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: parent.height;
+        interactive: false;
+        viewport-width: self.width;
+        viewport-height: Math.max(root.content-height, self.height);
+
+        @children
+    }
+
+    // scrollbar
+    if root.scrollable : Rectangle {
+        x: parent.width - 6px;
+        y: 0px;
+        width: 6px;
+        height: parent.height;
+
+        Rectangle {
+            x: 1px;
+            y: root.thumb-y;
+            width: 3px;
+            height: root.thumb-h;
+            border-radius: 1.5px;
+            background: (grab.pressed || grab.has-hover) ? #ffffffb0 : #ffffff55;
+            animate background { duration: 120ms; }
+
+            grab := TouchArea {
+                x: -3px;
+                width: parent.width + 6px;
+                mouse-cursor: pointer;
+                moved => {
+                    if (self.pressed) {
+                        root.drag-by(self.mouse-y - self.pressed-y);
+                    }
+                }
+            }
+        }
+    }
+}
